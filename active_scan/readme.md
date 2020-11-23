@@ -47,6 +47,6 @@ To build the application, refer to the following table and open the project usin
 
 7. Device will perform the Active scan and show the scan result in the UART console
 
-    ![Console](images/wifi_sta_log3.png)
+    ![Console](images/wifi_sta_log3.PNG)
 
 
