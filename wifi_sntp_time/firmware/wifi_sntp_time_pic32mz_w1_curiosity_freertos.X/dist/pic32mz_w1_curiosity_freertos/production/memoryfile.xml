@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<project>                                  
+  <executable name="dist/pic32mz_w1_curiosity_freertos/production/wifi_sntp_time_pic32mz_w1_curiosity_freertos.X.production.elf">                 
+    <memory name="program">                 
+      <units>bytes</units>                 
+      <length>1049728</length>                 
+      <used>470144</used>                     
+      <free>579584</free>                     
+    </memory>                              
+    <memory name="data">              
+      <units>bytes</units>                 
+      <length>262144</length>                 
+      <used>48788</used>                     
+      <free>213356</free>                     
+    </memory>                              
+  </executable>                            
+</project>                                 

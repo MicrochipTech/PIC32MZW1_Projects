@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<project>                                  
+  <executable name="dist/pic32mz_w1_curiosity_freertos/production/init_time_pic32mz_w1_curiosity_freertos.X.production.elf">                 
+    <memory name="program">                 
+      <units>bytes</units>                 
+      <length>1049728</length>                 
+      <used>466976</used>                     
+      <free>582752</free>                     
+    </memory>                              
+    <memory name="data">              
+      <units>bytes</units>                 
+      <length>262144</length>                 
+      <used>48648</used>                     
+      <free>213496</free>                     
+    </memory>                              
+  </executable>                            
+</project>                                 
