@@ -1,5 +1,7 @@
 # Wi-Fi Passive Scan
 
+> Please refer to (Passive scan in PIC32MZW1/WFI32 device)[https://microchipsupport.force.com/s/article/Passive-scan-in-PIC32MZW1-WFI32-device] for more details about the implementation of this project
+
 This example application acts as a Wi-Fi Station(STA) to perform passive scan and show scan result
 
 ## Description
