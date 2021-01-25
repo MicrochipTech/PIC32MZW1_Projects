@@ -1,5 +1,7 @@
 # Directed Active Scan 
 
+> Please refer to [Directed active scan in PIC32MZW1/WFI32 device](https://microchipsupport.force.com/s/article/Directed-active-scan-in-PIC32MZW1-WFI32-device) for more details about the implementation of this project
+
 This example application acts as a Wi-Fi Station(STA) and initiate a directed active scan to find user defined SSID
 
 ## Description
