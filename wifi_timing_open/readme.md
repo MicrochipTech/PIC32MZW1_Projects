@@ -1,5 +1,7 @@
 # Wi-Fi Connection time (open mode) 
 
+> Please refer to [WLAN initial connection time for PIC32MZW1/WFI32 device](https://microchipsupport.force.com/s/article/WLAN-initial-connection-time-for-PIC32MZW1-WFI32-device) for more details about the implementation of this project
+
 This example application can be used to measure time taken to establish connection in Open mode.
 
 ## Description
