@@ -1,0 +1,14 @@
+configName: pic32mzw1_curiosity
+folderName: kitprotocol
+format_version: v1.0
+frameworkPath: ..\Harmony_release
+processor: PIC32MZ1025W104132
+projectName: kitprotocol
+settings:
+  PackageFilter: bsp;core;core_apps_pic32mz_w1;crypto;crypto;csp;csp_apps_pic32mz_w1;net;net;net;quick_docs;usb;wireless;wireless;wireless;wireless;wireless;wsg_dev;wsg_dev;wsg_dev;wsg_dev;wsg_dev;
+  FORCE_OPTIMIZATION: 'false'
+  GENERATE_BACKUP: 'true'
+  TRUSTZONE: 'false'
+  CMSISPath: .\dev_packs\arm\CMSIS\5.7.0
+  MERGE_STRATEGY: USER_RECENT
+  DFPPath: .\dev_packs\Microchip\PIC32MZ-W_DFP\1.3.177\atdf\PIC32MZ1025W104132.atdf
