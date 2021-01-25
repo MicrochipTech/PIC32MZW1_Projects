@@ -1,5 +1,7 @@
 # Wi-Fi and Peripheral initialization time  
 
+> Please refer to [Expected peripheral, Wi-Fi and TCP stack init time for PIC32MZW1/WFI32 device](https://microchipsupport.force.com/s/article/Expected-peripheral--Wi-Fi-and-TCP-stack-init-time-for-PIC32MZW1-WFI32-device) for more details about the implementation of this project
+
 This example application can be used to measure the time taken by the system and peripherals to initialize.
 
 ## Description
