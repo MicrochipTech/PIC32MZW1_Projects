@@ -1,5 +1,7 @@
 # Wi-Fi AP Mode Auto Channel Selection 
 
+> Please refer to [AP mode auto channel selection in PIC32MZW1/WFI32 device](https://microchipsupport.force.com/s/article/AP-mode-auto-channel-selection-in-PIC32MZW1-WFI32-device) for more details about the implementation of this project
+
 This example application acts as a Wi-Fi AP , selecting the channel with less traffic.
 
 ## Description
