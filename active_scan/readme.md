@@ -1,5 +1,7 @@
 # Wi-Fi Active Scan
 
+> Please refer to [Active scan in PIC32MZW1 WFI32 device](https://microchipsupport.force.com/s/article/Active-scan-in-PIC32MZW1-WFI32-device) for more details about the implementation of this project
+
 This example application acts as a Wi-Fi Station(STA) to perform active scan and show scan result
 
 ## Description
