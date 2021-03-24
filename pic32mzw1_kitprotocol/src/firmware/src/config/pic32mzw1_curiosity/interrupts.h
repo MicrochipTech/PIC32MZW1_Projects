@@ -1,23 +1,22 @@
 /*******************************************************************************
-  Interrupt System Service
+ System Interrupts File
 
   Company:
     Microchip Technology Inc.
 
   File Name:
-    sys_int.c
+    interrupt.h
 
   Summary:
-    Interrupt System Service APIs.
+    Interrupt vectors mapping
 
   Description:
-    This file contains functions related to the Interrupt System Service for PIC32
-    devices.
-*******************************************************************************/
+    This file contains declarations of device vectors used by Harmony 3
+ *******************************************************************************/
 
 // DOM-IGNORE-BEGIN
 /*******************************************************************************
-* Copyright (C) 2019 Microchip Technology Inc. and its subsidiaries.
+* Copyright (C) 2018 Microchip Technology Inc. and its subsidiaries.
 *
 * Subject to your compliance with these terms, you may use Microchip software
 * and any derivatives exclusively with Microchip products. It is your
@@ -37,64 +36,26 @@
 * FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
 * ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
 * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-*******************************************************************************/
+ *******************************************************************************/
 // DOM-IGNORE-END
+
+#ifndef INTERRUPTS_H
+#define INTERRUPTS_H
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: Included Files
 // *****************************************************************************
 // *****************************************************************************
+#include <stdint.h>
 
-#include "system/int/sys_int.h"
-#include "peripheral/evic/plib_evic.h"
 
 // *****************************************************************************
 // *****************************************************************************
-// Section: Function Definitions
+// Section: Handler Routines
 // *****************************************************************************
 // *****************************************************************************
 
-void SYS_INT_Enable( void )
-{
-    EVIC_INT_Enable();
-}
 
-bool SYS_INT_Disable( void )
-{
-    /* return the interrupt status */
-    return EVIC_INT_Disable();
-}
 
-void SYS_INT_Restore( bool state )
-{
-    EVIC_INT_Restore(state);
-}
-
-bool SYS_INT_SourceDisable( INT_SOURCE source )
-{
-    bool intSrcStatus;
-    bool interruptStatus;
-
-    /* Save the interrupt status and then Disable the global interrupt */
-    interruptStatus = (bool)(( uint32_t )__builtin_disable_interrupts() & 0x01);
-
-    /* get the interrupt status of this source before disable is called */
-    intSrcStatus = SYS_INT_SourceIsEnabled(source);
-
-    /* disable the interrupts */
-    EVIC_SourceDisable(source);
-
-    SYS_INT_Restore(interruptStatus);
-
-    /* return the source status */
-    return intSrcStatus;
-}
-
-void SYS_INT_SourceRestore( INT_SOURCE source, bool status )
-{
-    if( status )
-    {
-        SYS_INT_SourceEnable( source );
-    }
-}
+#endif // INTERRUPTS_H

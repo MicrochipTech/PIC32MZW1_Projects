@@ -74,6 +74,9 @@ To build the application, refer to the following table and open the project usin
 13.  Some of the expected message on UART terminal while generating Manifest file :
     ![](images/image10.PNG)  
 
+## Using the kit protocol with TrustFLEX
 
+The kit protocol implemented in this project can also be used to work with other trust platform modules such as the TrustFLEX, with minor modifications. 
+External trust platform modules can be connected to the WFI32E01 module using `I2C1`. The easiest way to get started would be to use a [ATECC608B Trust](https://www.microchip.com/developmenttools/ProductDetails/DT100104) attached to the mikroBUS header of the WFI32 curiosity board. 
 
-
+To update the kit-protocol firmware to use `I2C1` instead of the default `I2C2` (connected to the onboard TnG module), change `HAL_I2C_I2C2` defined in `hal_harmony_i2c.h` file of the kit protocol project to `HAL_I2C_I2C1`. Once updated kit protocol is compiled and flashed into the development board, You can use the TrustFLEX resource generation notebook of TrustPlatform design suite to configure the device.

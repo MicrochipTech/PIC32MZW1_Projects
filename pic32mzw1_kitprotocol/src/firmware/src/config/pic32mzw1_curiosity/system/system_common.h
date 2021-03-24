@@ -54,7 +54,6 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
     extern "C" {
@@ -109,7 +108,7 @@
 
 #ifndef SYS_ASSERT
 
-    #define SYS_ASSERT(test,message) printf(message"\r\n")
+    #define SYS_ASSERT(test,message)
 
 #endif
 

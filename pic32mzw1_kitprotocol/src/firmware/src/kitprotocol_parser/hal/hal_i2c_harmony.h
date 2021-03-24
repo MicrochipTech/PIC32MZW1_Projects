@@ -33,6 +33,24 @@
 #include <stdint.h>
 #include "kit_hal_interface.h"
 
+#define HAL_I2C_I2C2
+
+#if defined(HAL_I2C_I2C2)
+#define I2C_IsBusy  I2C2_IsBusy
+#define I2C_TransferSetup  I2C2_TransferSetup
+#define I2C_Write  I2C2_Write
+#define I2C_ErrorGet   I2C2_ErrorGet
+#define I2C_Read   I2C2_Read
+#elif defined(HAL_I2C_I2C1)
+#define I2C_IsBusy  I2C1_IsBusy
+#define I2C_TransferSetup  I2C1_TransferSetup
+#define I2C_Write  I2C1_Write
+#define I2C_ErrorGet   I2C1_ErrorGet
+#define I2C_Read   I2C1_Read
+
+#endif
+
+
 enum kit_protocol_status i2c_interface_talk(uint32_t device_addr, uint8_t* data, uint16_t*
                                             tx_length, uint16_t* rx_length);
 enum kit_protocol_status hal_i2c_receive_peripheral(uint32_t device_addr, uint8_t *rxdata, 

@@ -90,9 +90,9 @@ void change_i2c_speed(uint32_t speed)
     setup.clkSpeed = speed;
 
     /* Make sure I2C is not busy before changing the I2C clock speed */
-    while (I2C2_IsBusy() == true);
+    while (I2C_IsBusy() == true);
     //while (SERCOM5_I2C_IsBusy() == true);
-    I2C2_TransferSetup(&setup, 0);
+    I2C_TransferSetup(&setup, 0);
     //SERCOM5_I2C_TransferSetup(&setup, 0);
 }
 
@@ -115,14 +115,14 @@ enum kit_protocol_status hal_i2c_wake(uint32_t device_addr)
         change_i2c_speed(newbdrt);  
     }
 
-    while (I2C2_IsBusy() == true);
+    while (I2C_IsBusy() == true);
     //while (SERCOM5_I2C_IsBusy() == true);
     // Send the 00 address as the wake pulse; part will NACK, so don't check for status
-    I2C2_Write(0x00, (uint8_t*)&data[0], 1);
+    I2C_Write(0x00, (uint8_t*)&data[0], 1);
     //SERCOM5_I2C_Write(0x00, (uint8_t*)&data[0], 1);
     
     /* Wait for the I2C transfer to complete */
-    while (I2C2_IsBusy() == true);
+    while (I2C_IsBusy() == true);
     //while (SERCOM5_I2C_IsBusy() == true);
     // wait tWHI + tWLO which is configured based on device type and configuration structure
     atca_delay_us(1500);
@@ -149,18 +149,18 @@ enum kit_protocol_status hal_i2c_idle(uint32_t device_addr)
     data[0] = 0x02;  // idle word address value
 
     /* Wait for the I2C bus to be ready */
-    while (I2C2_IsBusy() == true);
+    while (I2C_IsBusy() == true);
     //while (SERCOM5_I2C_IsBusy() == true);
 
-    if (I2C2_Write(device_addr>>1, (uint8_t*)&data[0], 1) == true)
+    if (I2C_Write(device_addr>>1, (uint8_t*)&data[0], 1) == true)
     //if (SERCOM5_I2C_Write(device_addr>>1, (uint8_t*)&data[0], 1) == true)
     {
         /* Wait for the I2C transfer to complete */
-        while (I2C2_IsBusy() == true);
+        while (I2C_IsBusy() == true);
         //while (SERCOM5_I2C_IsBusy() == true);
 
         /* Transfer complete. Check if the transfer was successful */
-        if (I2C2_ErrorGet() != I2C_ERROR_NONE)
+        if (I2C_ErrorGet() != I2C_ERROR_NONE)
         //if (SERCOM5_I2C_ErrorGet() != SERCOM_I2C_ERROR_NONE)
         {
             return KIT_STATUS_COMM_FAIL;
@@ -185,18 +185,18 @@ enum kit_protocol_status hal_i2c_sleep(uint32_t device_addr)
     data[0] = 0x01;  // sleep word address value
 
     /* Wait for the I2C bus to be ready */
-    while (I2C2_IsBusy() == true);
+    while (I2C_IsBusy() == true);
     //while (SERCOM5_I2C_IsBusy() == true);
-    if (I2C2_Write(device_addr>>1, (uint8_t*)&data[0], 1) == true)
+    if (I2C_Write(device_addr>>1, (uint8_t*)&data[0], 1) == true)
     //if (SERCOM5_I2C_Write(device_addr>>1, (uint8_t*)&data[0], 1) == true)
 
     {
         /* Wait for the I2C transfer to complete */
-        while (I2C2_IsBusy() == true);
+        while (I2C_IsBusy() == true);
         //while (SERCOM5_I2C_IsBusy() == true);
 
         /* Transfer complete. Check if the transfer was successful */
-        if (I2C2_ErrorGet() != I2C_ERROR_NONE)
+        if (I2C_ErrorGet() != I2C_ERROR_NONE)
         //if (SERCOM5_I2C_ErrorGet() != SERCOM_I2C_ERROR_NONE)
         {
             return KIT_STATUS_COMM_FAIL;
@@ -222,18 +222,18 @@ enum kit_protocol_status hal_i2c_send(uint32_t device_addr, uint8_t *txdata, uin
 
     do
     {
-        while (I2C2_IsBusy() == true);
+        while (I2C_IsBusy() == true);
         //while (SERCOM5_I2C_IsBusy() == true);
 
-        if (I2C2_Write((device_addr >> 1), &txdata[0], *txlength) == true)
+        if (I2C_Write((device_addr >> 1), &txdata[0], *txlength) == true)
         //if (SERCOM5_I2C_Write((device_addr >> 1), &txdata[0], *txlength) == true)
         {
             /* Wait for the I2C transfer to complete */
-            while (I2C2_IsBusy() == true);
+            while (I2C_IsBusy() == true);
             //while (SERCOM5_I2C_IsBusy() == true);
 
             /* Transfer complete. Check if the transfer was successful */
-            if (I2C2_ErrorGet() != I2C_ERROR_NONE)
+            if (I2C_ErrorGet() != I2C_ERROR_NONE)
             //if (SERCOM5_I2C_ErrorGet() != SERCOM_I2C_ERROR_NONE)
             {
                 status = KIT_STATUS_COMM_FAIL;
@@ -268,14 +268,14 @@ enum kit_protocol_status hal_i2c_receive_peripheral(uint32_t device_addr, uint8_
 {
     enum kit_protocol_status status = KIT_STATUS_COMM_FAIL;
 
-    if (I2C2_Read(device_addr>>1, rxdata, rxlength) == true)
+    if (I2C_Read(device_addr>>1, rxdata, rxlength) == true)
     //if (SERCOM5_I2C_Read(device_addr>>1, rxdata, rxlength) == true)
     {
         /* Wait for the I2C transfer to complete */
-        while (I2C2_IsBusy() == true);
+        while (I2C_IsBusy() == true);
         //while (SERCOM5_I2C_IsBusy() == true);
         /* Transfer complete. Check if the transfer was successful */
-        if (I2C2_ErrorGet() == I2C_ERROR_NONE)
+        if (I2C_ErrorGet() == I2C_ERROR_NONE)
         //if (SERCOM5_I2C_ErrorGet() == SERCOM_I2C_ERROR_NONE)
         {
             status = KIT_STATUS_SUCCESS;

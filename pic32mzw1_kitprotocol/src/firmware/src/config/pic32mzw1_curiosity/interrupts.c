@@ -50,7 +50,9 @@
 // *****************************************************************************
 
 #include "configuration.h"
+#include "interrupts.h"
 #include "definitions.h"
+
 
 // *****************************************************************************
 // *****************************************************************************
@@ -60,6 +62,8 @@
 
 
 void DRV_USBFS_USB_Handler( void );
+void I2C1_BUS_InterruptHandler( void );
+void I2C1_MASTER_InterruptHandler( void );
 void I2C2_BUS_InterruptHandler( void );
 void I2C2_MASTER_InterruptHandler( void );
 
@@ -69,6 +73,16 @@ void I2C2_MASTER_InterruptHandler( void );
 void __ISR(_USB_VECTOR, ipl1SRS) USB_Handler (void)
 {
     DRV_USBFS_USB_Handler();
+}
+
+void __ISR(_I2C1_BUS_VECTOR, ipl1SRS) I2C1_BUS_Handler (void)
+{
+    I2C1_BUS_InterruptHandler();
+}
+
+void __ISR(_I2C1_MASTER_VECTOR, ipl1SRS) I2C1_MASTER_Handler (void)
+{
+    I2C1_MASTER_InterruptHandler();
 }
 
 void __ISR(_I2C2_BUS_VECTOR, ipl1SRS) I2C2_BUS_Handler (void)

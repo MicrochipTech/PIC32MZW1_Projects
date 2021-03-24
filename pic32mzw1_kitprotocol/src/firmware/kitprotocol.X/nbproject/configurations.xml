@@ -158,6 +158,7 @@
               <logicalFolder name="f1" displayName="master" projectFiles="true">
                 <itemPath>../src/config/pic32mzw1_curiosity/peripheral/i2c/master/plib_i2c_master_common.h</itemPath>
                 <itemPath>../src/config/pic32mzw1_curiosity/peripheral/i2c/master/plib_i2c2_master.h</itemPath>
+                <itemPath>../src/config/pic32mzw1_curiosity/peripheral/i2c/master/plib_i2c1_master.h</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f5" displayName="uart" projectFiles="true">
@@ -200,6 +201,7 @@
           <itemPath>../src/config/pic32mzw1_curiosity/definitions.h</itemPath>
           <itemPath>../src/config/pic32mzw1_curiosity/user.h</itemPath>
           <itemPath>../src/config/pic32mzw1_curiosity/configuration.h</itemPath>
+          <itemPath>../src/config/pic32mzw1_curiosity/interrupts.h</itemPath>
         </logicalFolder>
       </logicalFolder>
       <itemPath>../src/app.h</itemPath>
@@ -244,6 +246,7 @@
             <logicalFolder name="f1" displayName="i2c" projectFiles="true">
               <logicalFolder name="f1" displayName="master" projectFiles="true">
                 <itemPath>../src/config/pic32mzw1_curiosity/peripheral/i2c/master/plib_i2c2_master.c</itemPath>
+                <itemPath>../src/config/pic32mzw1_curiosity/peripheral/i2c/master/plib_i2c1_master.c</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f5" displayName="uart" projectFiles="true">
@@ -330,6 +333,7 @@
         <itemPath>../src/config/pic32mzw1_curiosity/pic32mzw1_curiosity.mhc/drv_usbfs_v1.yml</itemPath>
         <itemPath>../src/config/pic32mzw1_curiosity/pic32mzw1_curiosity.mhc/GraphSettings.yml</itemPath>
         <itemPath>../src/config/pic32mzw1_curiosity/pic32mzw1_curiosity.mhc/HarmonyCore.yml</itemPath>
+        <itemPath>../src/config/pic32mzw1_curiosity/pic32mzw1_curiosity.mhc/i2c1.yml</itemPath>
         <itemPath>../src/config/pic32mzw1_curiosity/pic32mzw1_curiosity.mhc/i2c2.yml</itemPath>
         <itemPath>../src/config/pic32mzw1_curiosity/pic32mzw1_curiosity.mhc/project.yml</itemPath>
         <itemPath>../src/config/pic32mzw1_curiosity/pic32mzw1_curiosity.mhc/settings.yml</itemPath>
@@ -353,7 +357,7 @@
         <targetDevice>PIC32MZ1025W104132</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>snap</platformTool>
+        <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>2.50</languageToolchainVersion>
         <platform>3</platform>
@@ -415,7 +419,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/pic32mzw1_curiosity;../src/packs/PIC32MZ1025W104132_DFP;"/>
+                  value="../src;../src/config/pic32mzw1_curiosity;../src/packs/PIC32MZ1025W104132_DFP"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -512,7 +516,7 @@
         <property key="exceptions" value="true"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/pic32mzw1_curiosity;../src/packs/PIC32MZ1025W104132_DFP;"/>
+                  value="../src;../src/config/pic32mzw1_curiosity;../src/packs/PIC32MZ1025W104132_DFP"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -619,6 +623,11 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </PICkit3PlatformTool>
+      <pk4hybrid>
+        <property key="memories.programmemory.ranges" value="10000000-100fffff"/>
+        <property key="programmerToGoFilePath"
+                  value="D:/temp/PIC32MZW1_Projects/pic32mzw1_kitprotocol/src/firmware/kitprotocol.X/debug/pic32mzw1_curiosity/kitprotocol_ptg"/>
+      </pk4hybrid>
     </conf>
   </confs>
 </configurationDescriptor>

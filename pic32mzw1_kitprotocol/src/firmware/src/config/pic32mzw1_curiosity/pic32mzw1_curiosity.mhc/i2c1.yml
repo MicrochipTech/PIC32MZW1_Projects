@@ -1,6 +1,6 @@
 format_version: v1.0
 type: UniqueComponent
-attributes: {id: i2c2}
+attributes: {id: i2c1}
 children:
 - type: Symbols
   children:
@@ -10,34 +10,27 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: i2c2, value: '992'}
-  - type: Integer
-    attributes: {id: I2CS_CORE_TIMER_FREQUENCY}
-    children:
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: i2c2, value: '100000000'}
+        attributes: {id: i2c1, value: '992'}
   - type: Integer
     attributes: {id: I2CS_RISE_TIME_CORE_TIMER_CNTS}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: i2c2, value: '30'}
+        attributes: {id: i2c1, value: '30'}
   - type: Integer
     attributes: {id: I2CS_SETUP_TIME_CORE_TIMER_CNTS}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: i2c2, value: '10'}
-  - type: Integer
-    attributes: {id: I2C_CLOCK_FREQ}
+        attributes: {id: i2c1, value: '10'}
+  - type: Long
+    attributes: {id: I2C_CLOCK_SPEED_HZ}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: i2c2, value: '100000000'}
+        attributes: {id: i2c1, value: '50000'}
 - type: ElementPosition
-  attributes: {x: '180', y: '96', id: i2c2}
+  attributes: {x: '336', y: '92', id: i2c1}

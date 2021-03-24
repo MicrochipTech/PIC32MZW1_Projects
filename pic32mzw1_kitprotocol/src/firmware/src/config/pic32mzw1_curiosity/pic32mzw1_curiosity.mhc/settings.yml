@@ -5,10 +5,10 @@ frameworkPath: ..\Harmony_release
 processor: PIC32MZ1025W104132
 projectName: kitprotocol
 settings:
-  PackageFilter: bsp;core;core_apps_pic32mz_w1;crypto;crypto;csp;csp_apps_pic32mz_w1;net;net;net;quick_docs;usb;wireless;wireless;wireless;wireless;wireless;wsg_dev;wsg_dev;wsg_dev;wsg_dev;wsg_dev;
+  PackageFilter: audio;aws_cloud;bootloader;bsp;core;core_apps_pic32mz_w1;crypto;cryptoauthlib;cryptoauthlib_apps;crypto_apps_encrypt_decrypt;crypto_apps_large_hash;crypto_apps_speed_test;csp;csp_apps_pic32mz_w1;net;net_dev;quick_docs;reference_apps;touch;touch_apps;usb;usb_git;wireless;wireless_rel
   FORCE_OPTIMIZATION: 'false'
   GENERATE_BACKUP: 'true'
   TRUSTZONE: 'false'
   CMSISPath: .\dev_packs\arm\CMSIS\5.7.0
-  MERGE_STRATEGY: USER_RECENT
-  DFPPath: .\dev_packs\Microchip\PIC32MZ-W_DFP\1.3.177\atdf\PIC32MZ1025W104132.atdf
+  MERGE_STRATEGY: ALL
+  DFPPath: '.\dev_packs\Microchip\PIC32MZ-W_DFP\1.4.193\atdf\PIC32MZ1025W104132.atdf '
