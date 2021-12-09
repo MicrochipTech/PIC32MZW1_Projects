@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<project>                                  
+  <executable name="dist/pic32mz_w1_eth_wifi_freertos/production/pic32mz_w1_curiosity_freertos_routing.X.production.elf">                 
+    <memory name="program">                 
+      <units>bytes</units>                 
+      <length>1049728</length>                 
+      <used>715232</used>                     
+      <free>334496</free>                     
+    </memory>                              
+    <memory name="data">              
+      <units>bytes</units>                 
+      <length>262144</length>                 
+      <used>48304</used>                     
+      <free>213840</free>                     
+    </memory>                              
+  </executable>                            
+</project>                                 
