@@ -62,7 +62,6 @@ typedef enum
 
     /* Wi-Fi Provisioning service NVM read state */
     SYS_WIFIPROV_NVM_READ,
-
     /* Wi-Fi Provisioning service invalid state */
     SYS_WIFIPROV_NONE = 255
 } SYS_WIFIPROV_NVMTYPEOPER; //NVM Operation
@@ -83,7 +82,6 @@ typedef struct
 // *****************************************************************************
 /*Wi-Fi Provisioning Object */
 static  SYS_WIFIPROV_OBJ      g_wifiProvSrvcObj = {SYS_WIFIPROV_STATUS_NONE, SYS_WIFIPROV_NONE};
-
 /* Wi-Fi Provisioning Configuration */
 static  SYS_WIFIPROV_CONFIG   g_wifiProvSrvcConfig CACHE_ALIGN;
 
@@ -107,12 +105,6 @@ static      int    SYS_WIFIPROV_CMDHelp
 (
     SYS_CMD_DEVICE_NODE* pCmdIO, 
     int argc, char** argv
-);
-static     uint8_t parser_data
-(
-    uint8_t sbuff[], uint8_t dbuff[], 
-    uint8_t dbufflen, uint8_t val, 
-    uint8_t offset
 );
 static      void   SYS_WIFIPROV_PrintConfig(void);
 // *****************************************************************************
@@ -225,7 +217,6 @@ static inline void SYS_WIFIPROV_NVMErase(void)
     g_wifiProvSrvcObj.nvmTypeOfOperation = SYS_WIFIPROV_NVM_ERASE;
     NVM_PageErase(SYS_WIFIPROV_NVMADDR);
 }
-
 static void SYS_WIFIPROV_PrintConfig(void) 
 {
     SYS_CONSOLE_PRINT("\r\n mode=%d (0-STA,1-AP) saveConfig=%d countryCode=%s\r\n ", g_wifiProvSrvcConfig.mode, g_wifiProvSrvcConfig.saveConfig, g_wifiProvSrvcConfig.countryCode);
@@ -261,7 +252,6 @@ static SYS_WIFIPROV_STATUS SYS_WIFIPROV_ExecuteBlock
     {
         switch (wifiProvSrvcObj->status) 
         {
-
            case SYS_WIFIPROV_STATUS_NVM_READ:
             {
                 /* Check if NVM flash performing any operation */
@@ -319,7 +309,6 @@ static SYS_WIFIPROV_STATUS SYS_WIFIPROV_ExecuteBlock
                 }
                 break;
             }
-
             case SYS_WIFIPROV_STATUS_WAITFORREQ:
             default:
             {
@@ -426,9 +415,9 @@ static int SYS_WIFIPROV_CMDProcess
     char** argv
 ) 
 {
-    char val = '"';
     SYS_WIFIPROV_CONFIG wifiProvSrvcConfig;
     bool error = false;
+    uint8_t len = 0;
 
     memset(&wifiProvSrvcConfig, 0, sizeof (SYS_WIFIPROV_CONFIG));
     if ((argc >= 7) && (!strcmp(argv[1], "set"))) 
@@ -437,9 +426,10 @@ static int SYS_WIFIPROV_CMDProcess
         {
             wifiProvSrvcConfig.mode = strtol(argv[2], NULL, 0);
             wifiProvSrvcConfig.saveConfig = strtol(argv[3], NULL, 0);
-            if (strlen((const char *) argv[4]) <= sizeof (wifiProvSrvcConfig.countryCode)) 
+            len = strlen((const char *) argv[4])+1; 
+            if (len <= sizeof (wifiProvSrvcConfig.countryCode)) 
             {
-                parser_data((uint8_t *) argv[4], wifiProvSrvcConfig.countryCode, sizeof(wifiProvSrvcConfig.countryCode), val, 0);
+                memcpy((char *)wifiProvSrvcConfig.countryCode,argv[4],len);
             } 
             else 
             {
@@ -448,9 +438,10 @@ static int SYS_WIFIPROV_CMDProcess
             wifiProvSrvcConfig.staConfig.channel = strtol(argv[5], NULL, 0);
             wifiProvSrvcConfig.staConfig.autoConnect = strtol(argv[6], NULL, 0);
             wifiProvSrvcConfig.staConfig.authType = strtol(argv[7], NULL, 0);
-            if (strlen((const char *) argv[8]) <= sizeof (wifiProvSrvcConfig.staConfig.ssid)) 
+            len = strlen((const char *) argv[8])+1;
+            if (len <= sizeof (wifiProvSrvcConfig.staConfig.ssid)) 
             {
-                parser_data((uint8_t *) argv[8], wifiProvSrvcConfig.staConfig.ssid, sizeof(wifiProvSrvcConfig.staConfig.ssid), val, 0);
+                memcpy((char *)wifiProvSrvcConfig.staConfig.ssid,argv[8],len);
             } 
             else 
             {
@@ -459,11 +450,12 @@ static int SYS_WIFIPROV_CMDProcess
 
             if (argc == 10) 
             {
-                if (strlen((const char *) argv[9]) <= sizeof (wifiProvSrvcConfig.staConfig.psk)) 
+                len = strlen((const char *) argv[9])+1;
+                if (len <= sizeof (wifiProvSrvcConfig.staConfig.psk)) 
                 {
-                    parser_data((uint8_t *) argv[9], wifiProvSrvcConfig.staConfig.psk, sizeof(wifiProvSrvcConfig.staConfig.psk), val, 0);
+                    memcpy((char *)wifiProvSrvcConfig.staConfig.psk,argv[9],len);
                 } 
-                else 
+                else
                 {
                     error = true;
                 }
@@ -475,11 +467,26 @@ static int SYS_WIFIPROV_CMDProcess
 
             if ((!error) && (!SYS_WIFIPROV_ConfigValidate(wifiProvSrvcConfig))) 
             {
-                g_wifiProvSrvcConfig.mode = wifiProvSrvcConfig.mode;
-                g_wifiProvSrvcConfig.saveConfig = wifiProvSrvcConfig.saveConfig;
-                memcpy(&g_wifiProvSrvcConfig.staConfig, &wifiProvSrvcConfig.staConfig, sizeof(SYS_WIFIPROV_STA_CONFIG));
-                SYS_WIFIPROV_WriteConfig();
-                //SYS_WIFIPROV_PrintConfig();
+                if(((g_wifiProvSrvcConfig.mode == wifiProvSrvcConfig.mode) &&( wifiProvSrvcConfig.mode == SYS_WIFIPROV_STA)) &&
+                   (!(strcmp((const char*) &g_wifiProvSrvcConfig.countryCode,(const char*)&wifiProvSrvcConfig.countryCode))) &&
+                    (g_wifiProvSrvcConfig.saveConfig == wifiProvSrvcConfig.saveConfig) &&
+                   (!(strcmp((const char*) &g_wifiProvSrvcConfig.staConfig.ssid,(const char*)&wifiProvSrvcConfig.staConfig.ssid)))&&
+                   (g_wifiProvSrvcConfig.staConfig.authType == wifiProvSrvcConfig.staConfig.authType)&& 
+                   (g_wifiProvSrvcConfig.staConfig.autoConnect == wifiProvSrvcConfig.staConfig.autoConnect)&&
+                   (g_wifiProvSrvcConfig.staConfig.channel == wifiProvSrvcConfig.staConfig.channel)&&
+                   !(strcmp((const char*)&g_wifiProvSrvcConfig.staConfig.psk,(const char*)&wifiProvSrvcConfig.staConfig.psk)))
+                {
+                    SYS_CONSOLE_PRINT(" AP details already stored\n");
+                }
+                else
+                {
+                    
+                    g_wifiProvSrvcConfig.mode = wifiProvSrvcConfig.mode;
+                    g_wifiProvSrvcConfig.saveConfig = wifiProvSrvcConfig.saveConfig;
+                    memcpy(&g_wifiProvSrvcConfig.staConfig, &wifiProvSrvcConfig.staConfig, sizeof(SYS_WIFIPROV_STA_CONFIG));
+                    SYS_WIFIPROV_WriteConfig();
+                    //SYS_WIFIPROV_PrintConfig();
+                }
             } 
             else 
             {
@@ -489,9 +496,10 @@ static int SYS_WIFIPROV_CMDProcess
         {
             wifiProvSrvcConfig.mode = strtol(argv[2], NULL, 0);
             wifiProvSrvcConfig.saveConfig = strtol(argv[3], NULL, 0);
-            if (strlen((const char *) argv[4]) <= sizeof (wifiProvSrvcConfig.countryCode)) 
+            len = strlen((const char *) argv[4])+1; 
+            if (len <= sizeof (wifiProvSrvcConfig.countryCode)) 
             {
-                parser_data((uint8_t *) argv[4], wifiProvSrvcConfig.countryCode, sizeof(wifiProvSrvcConfig.countryCode), val, 0);
+                memcpy((char *)wifiProvSrvcConfig.countryCode,argv[4],len);
             } 
             else 
             {
@@ -500,10 +508,10 @@ static int SYS_WIFIPROV_CMDProcess
             wifiProvSrvcConfig.apConfig.channel = strtol(argv[5], NULL, 0);
             wifiProvSrvcConfig.apConfig.ssidVisibility = strtol(argv[6], NULL, 0);
             wifiProvSrvcConfig.apConfig.authType = strtol(argv[7], NULL, 0);
-
-            if (strlen((const char *) argv[8]) <= sizeof (wifiProvSrvcConfig.apConfig.ssid)) 
+            len = strlen((const char *) argv[8])+1;
+            if (len <= sizeof (wifiProvSrvcConfig.apConfig.ssid)) 
             {
-                parser_data((uint8_t *) argv[8], wifiProvSrvcConfig.apConfig.ssid, sizeof(wifiProvSrvcConfig.apConfig.ssid), val, 0);
+                memcpy((char *)wifiProvSrvcConfig.apConfig.ssid,argv[8],len);
             } 
             else 
             {
@@ -512,9 +520,10 @@ static int SYS_WIFIPROV_CMDProcess
             
             if (argc == 10) 
             {
-                if (strlen((const char *)argv[9]) <= sizeof(wifiProvSrvcConfig.apConfig.psk))
+                len = strlen((const char *) argv[9])+1;
+                if (len <= sizeof(wifiProvSrvcConfig.apConfig.psk))
                 {
-                    parser_data((uint8_t *)argv[9],wifiProvSrvcConfig.apConfig.psk,sizeof(wifiProvSrvcConfig.apConfig.psk),val,0);
+                     memcpy((char *)wifiProvSrvcConfig.apConfig.psk,argv[9],len);
                 } 
                 else 
                 {
@@ -587,34 +596,6 @@ static int SYS_WIFIPROV_CMDHelp(SYS_CMD_DEVICE_NODE* pCmdIO, int argc, char** ar
     SYS_CONSOLE_MESSAGE("wifiprov debug level <value> : Set WiFi Provision Debug level value in hex \r\n");
     SYS_CONSOLE_MESSAGE("wifiprov debug flow <value>  : Set WiFi Provision Debug flow value in hex \r\n");
     return SYS_WIFIPROV_SUCCESS;
-}
-
-
-/* Parse the command data(sbuff) and update in the buffer(dbuff) */
-static uint8_t parser_data
-(
-    uint8_t sbuff[], 
-    uint8_t dbuff[], 
-    uint8_t dbufflen, 
-    uint8_t val, 
-    uint8_t offset
-) 
-{
-    uint8_t idx1 = offset + 1, idx2 = offset, idx3 = 0;
-    memset(dbuff, 0, dbufflen);
-
-    for (; (sbuff[idx2] == val) && (sbuff[idx1] != val);) 
-    {
-        dbuff[idx3++] = sbuff[idx1++];
-        /* SYS CMD service replacing space with NULL */
-        if (dbuff[idx3 - 1] == 0x00) /* check NUll in the data string */
-        {
-            /* Replace NULL(0x00) with space in the data string */
-            dbuff[idx3 - 1] = 0x20;  
-        }
-    }
-    dbuff[idx3] = '\0';
-    return idx3 + 1;
 }
 
 

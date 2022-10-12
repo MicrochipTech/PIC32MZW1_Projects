@@ -5,19 +5,6 @@ children:
 - type: Symbols
   children:
   - type: Boolean
-    attributes: {id: TCPIP_ICMP_CLIENT_USER_NOTIFICATION}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: sysWifiPic32mzw1, value: 'true'}
-  - type: Boolean
     attributes: {id: TCPIP_ICMP_COMMAND_ENABLE}
     children:
     - type: Attributes
@@ -44,12 +31,21 @@ children:
         attributes: {id: visible}
         children:
         - {type: Value, value: 'true'}
+  - type: Integer
+    attributes: {id: TCPIP_STACK_MAX_CLIENT_ECHO_REQUESTS}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
   - type: Boolean
     attributes: {id: TCPIP_STACK_USE_ICMP_CLIENT}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: sysWifiPic32mzw1, value: 'true'}
+        attributes: {id: tcpipDhcps, value: 'true'}
 - type: ElementPosition
-  attributes: {x: '440', y: '20', id: tcpipIcmp}
+  attributes: {x: '170', y: '160', id: tcpipIcmp}

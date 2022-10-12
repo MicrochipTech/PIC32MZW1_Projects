@@ -76,7 +76,6 @@ void _APP_Tasks(  void *pvParameters  )
     while(1)
     {
         APP_Tasks();
-        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
 

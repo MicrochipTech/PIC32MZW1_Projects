@@ -68,17 +68,6 @@ void _DRV_BA414E_Tasks(  void *pvParameters  )
     }
 }
 
-/* Handle for the APP_Tasks. */
-TaskHandle_t xAPP_Tasks;
-
-void _APP_Tasks(  void *pvParameters  )
-{
-    while(1)
-    {
-        APP_Tasks();
-    }
-}
-
 
 void _TCPIP_STACK_Task(  void *pvParameters  )
 {
@@ -86,6 +75,17 @@ void _TCPIP_STACK_Task(  void *pvParameters  )
     {
         TCPIP_STACK_Task(sysObj.tcpip);
         vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+}
+
+/* Handle for the APP_Tasks. */
+TaskHandle_t xAPP_Tasks;
+
+void _APP_Tasks(  void *pvParameters  )
+{   
+    while(1)
+    {
+        APP_Tasks();
     }
 }
 
@@ -103,7 +103,16 @@ static void _WDRV_PIC32MZW1_Tasks(  void *pvParameters  )
 {
     while(1)
     {
+        SYS_STATUS status;
+
         WDRV_PIC32MZW_Tasks(sysObj.drvWifiPIC32MZW1);
+
+        status = WDRV_PIC32MZW_Status(sysObj.drvWifiPIC32MZW1);
+
+        if ((SYS_STATUS_ERROR == status) || (SYS_STATUS_UNINITIALIZED == status))
+        {
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }
     }
 }
 

@@ -14,7 +14,7 @@
 
 //DOM-IGNORE-BEGIN
 /*******************************************************************************
-Copyright (C) 2020 released Microchip Technology Inc.  All rights reserved.
+Copyright (C) 2020-2021 released Microchip Technology Inc.  All rights reserved.
 
 Microchip licenses to you the right to use, modify, copy and distribute
 Software only when embedded on a Microchip microcontroller or digital signal
@@ -83,11 +83,20 @@ typedef struct
 // *****************************************************************************
 // *****************************************************************************
 
+/* Wi-Fi Scan user SSID linked list */
+static WDRV_PIC32MZW_SSID_LIST userSsidLinkedList[SYS_WIFI_SCAN_MAX_SSID_COUNT];
+
+/* Local copy of user SSIDs */
+static char g_scanSsidListString[(SYS_WIFI_SCAN_MAX_SSID_COUNT*WDRV_PIC32MZW_MAX_SSID_LEN)+SYS_WIFI_SCAN_MAX_SSID_COUNT];
+
+/* Wi-Fi  Service SSID Scan Configuration Structure */
+static    SYS_WIFI_SCAN_CONFIG  g_wifiSrvcScanConfig;
+
 /* Storing Wi-Fi Service Callbacks */
 static    SYS_WIFI_CALLBACK     g_wifiSrvcCallBack[SYS_WIFI_MAX_CBS];
 
 /* Wi-Fi Service Object */
-static    SYS_WIFI_OBJ          g_wifiSrvcObj = {SYS_WIFI_STATUS_NONE,NULL};
+static    SYS_WIFI_OBJ          g_wifiSrvcObj = {SYS_WIFI_STATUS_NONE,0};
 
 /* Wi-Fi Driver ASSOC Handle */
 static WDRV_PIC32MZW_ASSOC_HANDLE g_wifiSrvcDrvAssocHdl = WDRV_PIC32MZW_ASSOC_HANDLE_INVALID;
@@ -97,6 +106,7 @@ static    TCPIP_DHCP_HANDLE     g_wifiSrvcDhcpHdl = NULL;
 
 /* Wi-Fi STA Mode, Auto connect retry count */
 static    uint32_t              g_wifiSrvcAutoConnectRetry = 0;
+
 
 /* Wi-Fi  Service Configuration Structure */
 static    SYS_WIFI_CONFIG       g_wifiSrvcConfig;
@@ -113,6 +123,9 @@ static    char                  g_wifiSrvcProvCookieVal = 100;
 /* Wi-Fi Provision Service Object */
 static    SYS_MODULE_OBJ        g_wifiSrvcProvObj;
 
+/* RegDomain set status */
+bool      g_isRegDomainSetReq = false;
+
 /* Semaphore for Critical Section */
 static    OSAL_SEM_HANDLE_TYPE  g_wifiSrvcSemaphore;
 
@@ -122,10 +135,10 @@ static    bool                  ssid_found;
 
 // *****************************************************************************
 
-static     uint8_t               SYS_WIFI_DisConnect(void);
-static     SYS_WIFI_RESULT       SYS_WIFI_ConnectReq(void);
-static     SYS_WIFI_RESULT       SYS_WIFI_SetScan(uint8_t channel,bool active);
-
+static uint8_t SYS_WIFI_DisConnect(void);
+static SYS_WIFI_RESULT SYS_WIFI_ConnectReq(void);
+static SYS_WIFI_RESULT SYS_WIFI_SetScan(void);
+static void SYS_WIFI_ScanHandler (DRV_HANDLE handle, uint8_t index, uint8_t ofTotal, WDRV_PIC32MZW_BSS_INFO *pBSSInfo);
 
 static void  SYS_WIFI_WIFIPROVCallBack(uint32_t event, void * data,void *cookie);
 
@@ -135,6 +148,27 @@ static void  SYS_WIFI_WIFIPROVCallBack(uint32_t event, void * data,void *cookie)
 // Section: Local Functions
 // *****************************************************************************
 // *****************************************************************************
+
+static void SYS_WIFI_InitWifiScanInfoDefault(void)
+{
+    SYS_WIFI_SCAN_CONFIG  scanConfig;
+    memset(&scanConfig, 0, sizeof(scanConfig));
+    
+    scanConfig.channel          = SYS_WIFI_SCAN_CHANNEL;
+    scanConfig.mode             = SYS_WIFI_SCAN_MODE;
+    scanConfig.pSsidList        = SYS_WIFI_SCAN_SSID_LIST;
+    scanConfig.delimChar        = SYS_WIFI_SCAN_SSID_DELIM_CHAR;
+    scanConfig.chan24Mask       = SYS_WIFI_SCAN_CHANNEL24_MASK;
+    scanConfig.numSlots         = SYS_WIFI_SCAN_NUM_SLOTS;
+    scanConfig.activeSlotTime   = SYS_WIFI_SCAN_ACTIVE_SLOT_TIME;
+    scanConfig.passiveSlotTime  = SYS_WIFI_SCAN_PASSIVE_SLOT_TIME;
+    scanConfig.numProbes        = SYS_WIFI_SCAN_NUM_PROBES;
+    scanConfig.matchMode        = SYS_WIFI_SCAN_MATCH_MODE;
+    scanConfig.pNotifyCallback  = SYS_WIFI_ScanHandler;
+    
+    memcpy(&g_wifiSrvcScanConfig, &scanConfig, sizeof (g_wifiSrvcScanConfig));
+}
+
 
 static inline void SYS_WIFI_CallBackFun
 (
@@ -196,38 +230,38 @@ static inline bool SYS_WIFI_GetSaveConfig(void)
 
 static inline uint8_t * SYS_WIFI_GetSSID(void)  
 {
-        return g_wifiSrvcConfig.staConfig.ssid;
-    }
+    return g_wifiSrvcConfig.staConfig.ssid;
+}
 
 static inline uint8_t SYS_WIFI_GetSSIDLen(void)  
 {
-        return strlen((const char *)g_wifiSrvcConfig.staConfig.ssid);
-    }
+    return strlen((const char *)g_wifiSrvcConfig.staConfig.ssid);
+}
 
 static inline uint8_t SYS_WIFI_GetChannel(void)
 {
     return (g_wifiSrvcConfig.staConfig.channel);
-    }
+}
 
 static inline uint8_t SYS_WIFI_GetAuthType(void)
 {
-        return g_wifiSrvcConfig.staConfig.authType;
-    }
+    return g_wifiSrvcConfig.staConfig.authType;
+}
 
 static inline uint8_t *SYS_WIFI_GetPsk(void)
 {
-        return g_wifiSrvcConfig.staConfig.psk;
-    }
+    return g_wifiSrvcConfig.staConfig.psk;
+}
 
 static inline uint8_t SYS_WIFI_GetPskLen(void)
 {
-        return strlen((const char *)g_wifiSrvcConfig.staConfig.psk);
-    }
+    return strlen((const char *)g_wifiSrvcConfig.staConfig.psk);
+}
 
 static inline bool SYS_WIFI_GetSSIDVisibility(void)
 {
-        return 0;
-    }
+    return 0;
+}
 
 static inline const char *SYS_WIFI_GetCountryCode(void)
 {
@@ -236,8 +270,8 @@ static inline const char *SYS_WIFI_GetCountryCode(void)
 
 static inline bool SYS_WIFI_GetAutoConnect(void)
 {
-        return g_wifiSrvcConfig.staConfig.autoConnect;
-    }
+    return g_wifiSrvcConfig.staConfig.autoConnect;        
+}
 
 static inline void SYS_WIFI_SetTaskstatus
 (
@@ -252,8 +286,9 @@ static inline SYS_WIFI_STATUS SYS_WIFI_GetTaskstatus(void)
     return g_wifiSrvcObj.wifiSrvcStatus;
 }
 
-static inline void SYS_WIFI_PrintConfig(void)
+static inline void SYS_WIFI_PrintWifiConfig(void)
 {
+    SYS_CONSOLE_MESSAGE("Wi-Fi Configuration:\r\n");
     SYS_CONSOLE_PRINT("\r\n mode=%d (0-STA,1-AP) saveConfig=%d \r\n ", g_wifiSrvcConfig.mode, g_wifiSrvcConfig.saveConfig);
     if (g_wifiSrvcConfig.mode == SYS_WIFI_STA) 
     {
@@ -261,7 +296,15 @@ static inline void SYS_WIFI_PrintConfig(void)
     }
 
 }
-
+static inline void SYS_WIFI_PrintScanConfig(void)
+{
+    SYS_CONSOLE_MESSAGE("\r\nScan Configuration:\r\n");
+    SYS_CONSOLE_PRINT("\r\n mode=%d (0-Passive,1-Active) \r\n Channel=%d (0=All)", g_wifiSrvcScanConfig.mode, g_wifiSrvcScanConfig.channel);
+    SYS_CONSOLE_PRINT("\r\n Input SSID List=\"%s\" \r\n List Delimiter='%c' \r\n Channel Mask=0x%x \r\n Slots=%d \r\n Active Slot Time=%d \r\n Passive Slot Time=%d \r\n "
+            "Probes=%d \r\n Match Mode=%d (0-StopOnFirst,1-FindAll) \r\n\r\n", g_wifiSrvcScanConfig.pSsidList, g_wifiSrvcScanConfig.delimChar, 
+            g_wifiSrvcScanConfig.chan24Mask, g_wifiSrvcScanConfig.numSlots, g_wifiSrvcScanConfig.activeSlotTime, g_wifiSrvcScanConfig.passiveSlotTime, 
+            g_wifiSrvcScanConfig.numProbes, g_wifiSrvcScanConfig.matchMode);
+}
 static void SYS_WIFI_STAConnCallBack
 (
     DRV_HANDLE handle, 
@@ -325,9 +368,6 @@ static void SYS_WIFI_STAConnCallBack
             g_wifiSrvcAutoConnectRetry = 0;
             break;
         }
-
-        /*case WDRV_PIC32MZW_CONN_STATE_CONNECTING:
-            break;*/
         default:
         {
             break;
@@ -336,7 +376,7 @@ static void SYS_WIFI_STAConnCallBack
 }
 
 /* Wi-Fi driver callback received on setting Regulatory domain */
-static void SYS_WIFI_SetRegDomainCallback
+static void SYS_WIFI_RegDomainCallback
 (
     DRV_HANDLE handle, 
     uint8_t index, 
@@ -348,7 +388,12 @@ static void SYS_WIFI_SetRegDomainCallback
     if ((1 != index) || (1 != ofTotal) || (false == isCurrent) || (NULL == pRegDomInfo)) 
     {
         SYS_CONSOLE_MESSAGE("Regulatory domain set unsuccessful\r\n");
-    } 
+    }  
+    if(!memcmp(pRegDomInfo,SYS_WIFI_GetCountryCode(),strlen((const char *)pRegDomInfo)))
+    {
+        g_isRegDomainSetReq = true;
+    }
+
 }
 
 /* Wi-Fi driver update the Scan result on callback*/
@@ -368,7 +413,7 @@ static void SYS_WIFI_ScanHandler
     {
         if (1 == index) 
         {
-            char cmdTxt[8];
+            char cmdTxt[10];
             sprintf(cmdTxt, "SCAN#%02d", ofTotal);
             SYS_CONSOLE_PRINT("#%02d\r\n", ofTotal);
             SYS_CONSOLE_MESSAGE(">>#  RI  Sec  Recommend CH BSSID             SSID\r\n");
@@ -412,18 +457,23 @@ static void SYS_WIFI_ScanHandler
                 pBSSInfo->ctx.bssid.addr[0], pBSSInfo->ctx.bssid.addr[1], pBSSInfo->ctx.bssid.addr[2],
                 pBSSInfo->ctx.bssid.addr[3], pBSSInfo->ctx.bssid.addr[4], pBSSInfo->ctx.bssid.addr[5],
                 pBSSInfo->ctx.ssid.name);
-		}
-        if(strncmp((char *)pBSSInfo->ctx.ssid.name,SSID_UNDER_SCAN,strlen(SSID_UNDER_SCAN)) == 0)
-		{
-            ssid_found = true;
-		}
-        if((ofTotal > 0 ) && (ofTotal == index))
-        {
-           if(ssid_found == true)
-                SYS_CONSOLE_MESSAGE("SSID found");
-           else
-                SYS_CONSOLE_MESSAGE("SSID not found");
-		}
+        
+         if(strncmp((char *)pBSSInfo->ctx.ssid.name,SSID_UNDER_SCAN,strlen(SSID_UNDER_SCAN)) == 0)
+	{
+             ssid_found = true;
+	}
+         if((ofTotal > 0 ) && (ofTotal == index))
+         {
+             if(ssid_found == true) 
+             {
+                 SYS_CONSOLE_MESSAGE("SSID found\r\n");
+             }
+             else
+             {
+                 SYS_CONSOLE_MESSAGE("SSID not found\r\n");
+             }
+         }
+}
 }
 
 static void SYS_WIFI_TCPIP_DHCP_EventHandler
@@ -452,15 +502,8 @@ static void SYS_WIFI_TCPIP_DHCP_EventHandler
                 SYS_CONSOLE_PRINT("Gateway IP address = %d.%d.%d.%d \r\n",
                         gateWayAddr.v[0], gateWayAddr.v[1], gateWayAddr.v[2], gateWayAddr.v[3]);
 
-                /* Update the application(client) on receiving IP address */
-                SYS_WIFI_CallBackFun(SYS_WIFI_CONNECT, &ipAddr, g_wifiSrvcCookie);
-                provConnStatus = true;
-
-                /* Update the Wi-Fi provisioning service on receiving the IP Address, 
-                   The Wi-Fi provisioning service has to start the TCP server socket
-                   when IP address is assigned from HOMEAP to STA.only applicable 
-                   if user has enable TCP Socket configuration from MHC */
-                SYS_WIFIPROV_CtrlMsg(g_wifiSrvcProvObj,SYS_WIFIPROV_CONNECT,&provConnStatus,sizeof(bool));
+                g_wifiSrvcConfig.staConfig.ipAddr.Val=ipAddr.Val;
+                SYS_WIFI_SetTaskstatus(SYS_WIFI_STATUS_STA_IP_RECIEVED);
             }
             break;
         }
@@ -495,16 +538,96 @@ static void SYS_WIFI_TCPIP_DHCP_EventHandler
     }
 }
 
-static SYS_WIFI_RESULT SYS_WIFI_SetScan
-(
-    uint8_t channel, 
-    bool active
-) 
+static WDRV_PIC32MZW_SSID_LIST * SYS_WIFI_CreateSsidList(void)
+{
+    WDRV_PIC32MZW_SSID_LIST * result;
+    char key[2] = {0};
+    key[0] = g_wifiSrvcScanConfig.delimChar;
+    char * pch;
+    char * start;
+    char * end;
+    int len = 0;
+    int idx = 0;
+    if (g_wifiSrvcScanConfig.pSsidList)
+    {
+        memset(g_scanSsidListString, 0, sizeof(g_scanSsidListString));
+        start = g_wifiSrvcScanConfig.pSsidList;
+        end = start + strlen(start);
+        pch = strpbrk (start, key);
+        while ((start < end) && (idx < SYS_WIFI_SCAN_MAX_SSID_COUNT))
+        {
+            len = (int)(pch-start);
+            if ((len > 1) && (len < WDRV_PIC32MZW_MAX_SSID_LEN))
+            {
+                memset(userSsidLinkedList[idx].ssid.name, 0, WDRV_PIC32MZW_MAX_SSID_LEN);
+                userSsidLinkedList[idx].ssid.length = len;
+                memcpy(userSsidLinkedList[idx].ssid.name, start, len);
+                sprintf(g_scanSsidListString + strlen(g_scanSsidListString), "%.*s%c", len, start, g_wifiSrvcScanConfig.delimChar);
+                userSsidLinkedList[idx].pNext = NULL;
+                if (idx > 0)
+                {
+                    userSsidLinkedList[idx-1].pNext = &userSsidLinkedList[idx];
+                }
+                idx++;
+            }
+            start = pch+1;
+            pch = strpbrk(start,key);
+            if (pch == NULL)
+            {
+                pch = end;
+            }
+        }
+    }
+    
+    if (idx > 0)
+    {
+        result = userSsidLinkedList;
+        g_scanSsidListString[strlen(g_scanSsidListString)-1] = 0;
+        g_wifiSrvcScanConfig.pSsidList = g_scanSsidListString;
+    }
+    else
+    {
+        result = NULL;
+    }
+
+    return result;
+}
+
+static SYS_WIFI_RESULT SYS_WIFI_SetScan (void)
 {
     uint8_t ret = SYS_WIFI_FAILURE;
-    if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_BSSFindFirst(g_wifiSrvcObj.wifiSrvcDrvHdl, channel, active, (WDRV_PIC32MZW_BSSFIND_NOTIFY_CALLBACK) SYS_WIFI_ScanHandler)) 
+    
+    if (false == WDRV_PIC32MZW_BSSFindInProgress(g_wifiSrvcObj.wifiSrvcDrvHdl))
     {
-        ret = SYS_WIFI_SUCCESS ;
+        WDRV_PIC32MZW_SSID_LIST * pSSIDList = NULL;
+
+        pSSIDList = SYS_WIFI_CreateSsidList();
+
+//        SYS_WIFI_PrintScanConfig();
+
+        if (SYS_WIFI_SCAN_MODE_ACTIVE != g_wifiSrvcScanConfig.mode)
+        {
+            pSSIDList = NULL;
+        }
+        
+        if (g_wifiSrvcScanConfig.pNotifyCallback == NULL)
+        {
+            g_wifiSrvcScanConfig.pNotifyCallback = SYS_WIFI_ScanHandler;
+        }
+
+        if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_BSSFindSetScanMatchMode(g_wifiSrvcObj.wifiSrvcDrvHdl, g_wifiSrvcScanConfig.matchMode))
+        {
+            if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_BSSFindSetEnabledChannels24(g_wifiSrvcObj.wifiSrvcDrvHdl, g_wifiSrvcScanConfig.chan24Mask))
+            {
+                if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_BSSFindSetScanParameters(g_wifiSrvcObj.wifiSrvcDrvHdl, g_wifiSrvcScanConfig.numSlots, g_wifiSrvcScanConfig.activeSlotTime, g_wifiSrvcScanConfig.passiveSlotTime, g_wifiSrvcScanConfig.numProbes))
+                {
+                    if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_BSSFindFirst(g_wifiSrvcObj.wifiSrvcDrvHdl, g_wifiSrvcScanConfig.channel, g_wifiSrvcScanConfig.mode, pSSIDList, (WDRV_PIC32MZW_BSSFIND_NOTIFY_CALLBACK) g_wifiSrvcScanConfig.pNotifyCallback))   
+                    {
+                        ret = SYS_WIFI_SUCCESS ;
+                    }
+                }
+            }
+        }
     }
     return ret;
 }
@@ -536,10 +659,10 @@ static SYS_WIFI_RESULT SYS_WIFI_ConnectReq(void)
 {
     SYS_WIFI_RESULT ret = SYS_WIFI_CONNECT_FAILURE;
     
-        if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_BSSConnect(g_wifiSrvcObj.wifiSrvcDrvHdl, &g_wifiSrvcObj.wifiSrvcBssCtx, &g_wifiSrvcObj.wifiSrvcAuthCtx, SYS_WIFI_STAConnCallBack)) 
-        {
+    if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_BSSConnect(g_wifiSrvcObj.wifiSrvcDrvHdl, &g_wifiSrvcObj.wifiSrvcBssCtx, &g_wifiSrvcObj.wifiSrvcAuthCtx, SYS_WIFI_STAConnCallBack)) 
+    {
         ret = SYS_WIFI_SUCCESS ;
-        }
+    }
     
     if (SYS_WIFI_CONNECT_FAILURE == ret) 
     {
@@ -599,24 +722,6 @@ static SYS_WIFI_RESULT SYS_WIFI_ConfigReq(void)
                 break;
             }
 
-            case SYS_WIFI_WPA2WPA3MIXED:
-            {
-                if (WDRV_PIC32MZW_STATUS_OK != WDRV_PIC32MZW_AuthCtxSetPersonal(&g_wifiSrvcObj.wifiSrvcAuthCtx, pwd, pwdLen, WDRV_PIC32MZW_AUTH_TYPE_WPA2WPA3_PERSONAL)) 
-                {
-                    ret = SYS_WIFI_CONFIG_FAILURE;
-                }
-                break;
-            }
-
-            case SYS_WIFI_WPA3:
-            {
-                if (WDRV_PIC32MZW_STATUS_OK != WDRV_PIC32MZW_AuthCtxSetPersonal(&g_wifiSrvcObj.wifiSrvcAuthCtx, pwd, pwdLen, WDRV_PIC32MZW_AUTH_TYPE_WPA3_PERSONAL)) 
-                {
-                    ret = SYS_WIFI_CONFIG_FAILURE;
-                }
-                break;
-            }
-
             case SYS_WIFI_WEP:
             {
                ret = SYS_WIFI_CONFIG_FAILURE; 
@@ -633,6 +738,7 @@ static SYS_WIFI_RESULT SYS_WIFI_ConfigReq(void)
 
     if (SYS_WIFI_CONFIG_FAILURE == ret) 
     {
+        SYS_CONSOLE_MESSAGE("Error:Enter valid Wi-Fi configuration\r\n");
         SYS_WIFI_SetTaskstatus(SYS_WIFI_STATUS_CONFIG_ERROR);
     }
 
@@ -647,7 +753,8 @@ static SYS_WIFI_RESULT SYS_WIFI_SetConfig
 {
     /* When user has enabled Save config option,request Wi-Fi provisioning service 
        to store the configuration before making the connection request to user */
-    if (true == SYS_WIFI_GetSaveConfig()) 
+    //if (true == SYS_WIFI_GetSaveConfig())
+    if(wifi_config->saveConfig == true)
     {
         return SYS_WIFIPROV_CtrlMsg(g_wifiSrvcProvObj,SYS_WIFIPROV_SETCONFIG,wifi_config,sizeof(SYS_WIFI_CONFIG));
     } 
@@ -673,6 +780,7 @@ static uint32_t SYS_WIFI_ExecuteBlock
     static TCPIP_NET_HANDLE      netHdl;
     SYS_WIFI_OBJ *               wifiSrvcObj = (SYS_WIFI_OBJ *) object;
     uint8_t                      ret =  SYS_WIFIPROV_OBJ_INVALID;
+
  
     if (&g_wifiSrvcObj == (SYS_WIFI_OBJ*) wifiSrvcObj)
     {    
@@ -709,7 +817,11 @@ static uint32_t SYS_WIFI_ExecuteBlock
                     wifiSrvcObj->wifiSrvcDrvHdl = WDRV_PIC32MZW_Open(0, 0);
                     if (DRV_HANDLE_INVALID != wifiSrvcObj->wifiSrvcDrvHdl) 
                     {
-                        wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_AUTOCONNECT_WAIT;
+                        if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_RegDomainGet(wifiSrvcObj->wifiSrvcDrvHdl,WDRV_PIC32MZW_REGDOMAIN_SELECT_CURRENT,SYS_WIFI_RegDomainCallback))
+                        {
+//                            SYS_WIFI_PrintWifiConfig();
+                            wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_AUTOCONNECT_WAIT;
+                        }
                     }
                     OSAL_SEM_Post(&g_wifiSrvcSemaphore);
                 }
@@ -722,13 +834,19 @@ static uint32_t SYS_WIFI_ExecuteBlock
                 {
                     /* When user has enabled the auto connect feature of the Wi-Fi service in MHC(STA mode).
                        or in AP mode, below condition will be always true */
+
                     if (true == SYS_WIFI_GetAutoConnect()) 
                     {
-                        if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_RegDomainSet(wifiSrvcObj->wifiSrvcDrvHdl, SYS_WIFI_GetCountryCode(), SYS_WIFI_SetRegDomainCallback)) 
+                        if(g_isRegDomainSetReq == true)
                         {
-                            SYS_WIFI_PrintConfig();
-                            wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_TCPIP_WAIT_FOR_TCPIP_INIT;
+
+                            if (WDRV_PIC32MZW_STATUS_OK == WDRV_PIC32MZW_RegDomainSet(wifiSrvcObj->wifiSrvcDrvHdl, SYS_WIFI_GetCountryCode(), SYS_WIFI_RegDomainCallback)) 
+                            {
+                                
+                                g_isRegDomainSetReq = false;
+                            }
                         }
+                        wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_TCPIP_WAIT_FOR_TCPIP_INIT;
                     }
                     OSAL_SEM_Post(&g_wifiSrvcSemaphore);
                 }
@@ -749,12 +867,12 @@ static uint32_t SYS_WIFI_ExecuteBlock
                     {
                         /* PIC32MZW1 network handle*/
                         netHdl = TCPIP_STACK_NetHandleGet("PIC32MZW1");
-                            if ((true == TCPIP_DHCP_Enable(netHdl)) &&
-                                (TCPIP_STACK_ADDRESS_SERVICE_DHCPC == TCPIP_STACK_AddressServiceSelect(_TCPIPStackHandleToNet(netHdl), TCPIP_NETWORK_CONFIG_DHCP_CLIENT_ON))) 
-                            {
+                        if ((true == TCPIP_DHCP_Enable(netHdl)) && 
+                            (TCPIP_STACK_ADDRESS_SERVICE_DHCPC == TCPIP_STACK_AddressServiceSelect(_TCPIPStackHandleToNet(netHdl), TCPIP_NETWORK_CONFIG_DHCP_CLIENT_ON))) 
+                        {
                             g_wifiSrvcDhcpHdl= TCPIP_DHCP_HandlerRegister (netHdl, SYS_WIFI_TCPIP_DHCP_EventHandler, NULL);
-                            }
-                        } 
+                        }
+                    }                
                     wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_CONNECT_REQ;
                     OSAL_SEM_Post(&g_wifiSrvcSemaphore);
                 }
@@ -771,14 +889,39 @@ static uint32_t SYS_WIFI_ExecuteBlock
                         {
                             if (SYS_WIFI_SUCCESS == SYS_WIFI_ConnectReq()) 
                             {
-                        wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_TCPIP_READY;
-                    }
-                }
-            }
-                            OSAL_SEM_Post(&g_wifiSrvcSemaphore);
+                                wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_TCPIP_READY;
+                            }
                         }
+                    }
+                    OSAL_SEM_Post(&g_wifiSrvcSemaphore);
+                }
                 break;
             }
+            case SYS_WIFI_STATUS_STA_IP_RECIEVED:
+            {
+                WDRV_PIC32MZW_CHANNEL_ID channel;
+                bool provConnStatus = false;
+                 
+                /* Update the application(client) on receiving IP address */
+                SYS_WIFI_CallBackFun(SYS_WIFI_CONNECT, &g_wifiSrvcConfig.staConfig.ipAddr, g_wifiSrvcCookie);
+                provConnStatus = true;
+
+                /* Update the Wi-Fi provisioning service on receiving the IP Address, 
+                   The Wi-Fi provisioning service has to start the TCP server socket
+                   when IP address is assigned from HOMEAP to STA.only applicable 
+                   if user has enable TCP Socket configuration from MHC */
+                SYS_WIFIPROV_CtrlMsg(g_wifiSrvcProvObj,SYS_WIFIPROV_CONNECT,&provConnStatus,sizeof(bool));                
+                WDRV_PIC32MZW_InfoOpChanGet(g_wifiSrvcObj.wifiSrvcDrvHdl,&channel);
+                g_wifiSrvcConfig.staConfig.channel = (uint8_t )channel;
+                
+                if(g_wifiSrvcConfig.saveConfig == true)
+                {
+                  SYS_WIFIPROV_CtrlMsg(g_wifiSrvcProvObj,SYS_WIFIPROV_SETCONFIG,&g_wifiSrvcConfig,sizeof(SYS_WIFI_CONFIG));
+                }
+                wifiSrvcObj->wifiSrvcStatus = SYS_WIFI_STATUS_TCPIP_READY;
+                break;
+            }
+
 
             case SYS_WIFI_STATUS_TCPIP_READY:
             {
@@ -842,37 +985,40 @@ static void SYS_WIFI_WIFIPROVCallBack
                 }
                 else 
                 {
-                    if ((SYS_WIFIPROV_STA == (SYS_WIFIPROV_MODE)SYS_WIFI_GetMode()) && (SYS_WIFIPROV_STA == wifiConfig->mode))
+                    if(memcmp(&g_wifiSrvcConfig,wifiConfig,sizeof(SYS_WIFIPROV_CONFIG)))
                     {
-
-                        /* Copy received configuration into Wi-Fi service structure */
-                        memcpy(&g_wifiSrvcConfig,wifiConfig,sizeof(SYS_WIFIPROV_CONFIG));
-
-                        /* In STA mode, PIC32MZW1 is not connected to HOMEAP */
-                        if(g_wifiSrvcDrvAssocHdl == WDRV_PIC32MZW_ASSOC_HANDLE_INVALID)
+                        if ((SYS_WIFIPROV_STA == (SYS_WIFIPROV_MODE)SYS_WIFI_GetMode()) && (SYS_WIFIPROV_STA == wifiConfig->mode))
                         {
 
-                            /* Auto connected is enable by user and Auto connect 
-                               retry has not reach to maximum limit */
-                            if((true == SYS_WIFI_GetAutoConnect()) && (g_wifiSrvcAutoConnectRetry == MAX_AUTO_CONNECT_RETRY))
+                            /* Copy received configuration into Wi-Fi service structure */
+                            memcpy(&g_wifiSrvcConfig,wifiConfig,sizeof(SYS_WIFIPROV_CONFIG));
+
+                            /* In STA mode, PIC32MZW1 is not connected to HOMEAP */
+                            if(g_wifiSrvcDrvAssocHdl == WDRV_PIC32MZW_ASSOC_HANDLE_INVALID)
                             {
-                                SYS_WIFI_SetTaskstatus(SYS_WIFI_STATUS_CONNECT_REQ);
-                                g_wifiSrvcAutoConnectRetry = 0;
+
+                                /* Auto connected is enable by user and Auto connect 
+                                   retry has not reach to maximum limit */
+                                if((true == SYS_WIFI_GetAutoConnect()) && (g_wifiSrvcAutoConnectRetry < MAX_AUTO_CONNECT_RETRY))
+                                {
+                                    SYS_WIFI_SetTaskstatus(SYS_WIFI_STATUS_CONNECT_REQ);
+                                    g_wifiSrvcAutoConnectRetry = 0;
+                                }
+                            } 
+                            else 
+                            {
+
+                                /* In STA mode, PIC32MZW1 is already connected to HOMEAP,
+                                   so disconnect before applying new received configuration */
+                                SYS_WIFI_DisConnect();
                             }
-                        } 
-                        else 
+                        }
+                        if (data)
                         {
 
-                            /* In STA mode, PIC32MZW1 is already connected to HOMEAP,
-                               so disconnect before applying new received configuration */
-                            SYS_WIFI_DisConnect();
+                            /* Update application(client), on receiving new Provisioning configuration */
+                            SYS_WIFI_CallBackFun(SYS_WIFI_PROVCONFIG,data,g_wifiSrvcCookie);
                         }
-                    } 
-                    if (data) 
-                    {
-
-                        /* Update application(client), on receiving new Provisioning configuration */
-                        SYS_WIFI_CallBackFun(SYS_WIFI_PROVCONFIG,data,g_wifiSrvcCookie);
                     }
                 }
                 break;
@@ -882,7 +1028,7 @@ static void SYS_WIFI_WIFIPROVCallBack
             {
                 if (data) 
                 {
-                    SYS_WIFI_CallBackFun(SYS_WIFI_GETCONFIG, data, g_wifiSrvcCookie);
+                    SYS_WIFI_CallBackFun(SYS_WIFI_GETWIFICONFIG, data, g_wifiSrvcCookie);
                 }
                 break;
             }
@@ -915,6 +1061,7 @@ SYS_MODULE_OBJ SYS_WIFI_Initialize
             SYS_CONSOLE_MESSAGE("Failed to Initialize Wi-Fi Service as Semaphore NOT created\r\n");
             return SYS_MODULE_OBJ_INVALID;
         }
+        memset(g_wifiSrvcCallBack,0,sizeof(g_wifiSrvcCallBack));
         if (callback != NULL) 
         {
             SYS_WIFI_REGCB(callback);
@@ -925,6 +1072,7 @@ SYS_MODULE_OBJ SYS_WIFI_Initialize
         /* Set Wi-Fi service state to init */
         SYS_WIFI_SetTaskstatus(SYS_WIFI_STATUS_INIT);
         SYS_WIFI_SetCookie(cookie);
+        SYS_WIFI_InitWifiScanInfoDefault();
 
         /* User has enabled Wi-Fi provisioning service using MHC */
         g_wifiSrvcProvObj= SYS_WIFIPROV_Initialize ((SYS_WIFIPROV_CONFIG *)config,SYS_WIFI_WIFIPROVCallBack,&g_wifiSrvcProvCookieVal);
@@ -947,8 +1095,8 @@ SYS_WIFI_RESULT SYS_WIFI_Deinitialize
     
     if (&g_wifiSrvcObj == (SYS_WIFI_OBJ *) object) 
     {
-            SYS_WIFI_DisConnect();
-            TCPIP_DHCP_HandlerDeRegister(g_wifiSrvcDhcpHdl);
+        SYS_WIFI_DisConnect();
+        TCPIP_DHCP_HandlerDeRegister(g_wifiSrvcDhcpHdl);
         WDRV_PIC32MZW_Close(g_wifiSrvcObj.wifiSrvcDrvHdl);
         g_wifiSrvcInit = false;
         memset(&g_wifiSrvcObj,0,sizeof(SYS_WIFI_OBJ));
@@ -1021,8 +1169,6 @@ SYS_WIFI_RESULT SYS_WIFI_CtrlMsg
 ) 
 {
     uint8_t ret = SYS_WIFI_OBJ_INVALID;
-    uint8_t *channel;
-    bool *scanType;
 
     if (OSAL_RESULT_TRUE == OSAL_SEM_Pend(&g_wifiSrvcSemaphore, OSAL_WAIT_FOREVER)) 
     {
@@ -1039,7 +1185,12 @@ SYS_WIFI_RESULT SYS_WIFI_CtrlMsg
                     {
                         if ((buffer) && (length == sizeof (SYS_WIFI_CONFIG)))
                         {
-                            ret = SYS_WIFI_SetConfig((SYS_WIFI_CONFIG *) buffer, SYS_WIFI_STATUS_CONNECT_REQ);
+                            SYS_WIFI_STATUS wifiStatus = ((SYS_WIFI_OBJ *)object)->wifiSrvcStatus;
+                            if(wifiStatus >= SYS_WIFI_STATUS_CONNECT_REQ)
+                            { 
+                                wifiStatus = SYS_WIFI_STATUS_CONNECT_REQ; 
+                            }
+                            ret = SYS_WIFI_SetConfig((SYS_WIFI_CONFIG *) buffer, wifiStatus);
                         }
                     } 
                     else
@@ -1064,11 +1215,12 @@ SYS_WIFI_RESULT SYS_WIFI_CtrlMsg
                 case SYS_WIFI_DISCONNECT:
                 {
                     /* Client has made disconnect request */
+                    g_wifiSrvcConfig.staConfig.autoConnect = 0;
                     ret = SYS_WIFI_DisConnect();
                     break;
                 }
 
-                case SYS_WIFI_GETCONFIG:
+                case SYS_WIFI_GETWIFICONFIG:
                 {
                     if (true == g_wifiSrvcInit) 
                     {
@@ -1090,16 +1242,61 @@ SYS_WIFI_RESULT SYS_WIFI_CtrlMsg
                     break;
                 }
 
+                case SYS_WIFI_GETSCANCONFIG:
+                {
+                    if ((buffer) && (length == sizeof (SYS_WIFI_SCAN_CONFIG))) 
+                    {
+                        /* Client has request Wi-Fi Scan configuration,
+                        Copy Scan configuration into client structure */
+                        memcpy(buffer, &g_wifiSrvcScanConfig, sizeof (g_wifiSrvcScanConfig));
+                        ret = SYS_WIFI_SUCCESS;
+                    }
+                    else
+                    {
+                        ret = SYS_WIFI_FAILURE;
+                    }
+                    break;
+                }
+
                 case SYS_WIFI_SCANREQ:
                 {
-
-                    /* if service is already processing pending connection 
-                       request from client then ignore new request */
-                    if ((SYS_WIFI_STATUS_CONNECT_REQ != g_wifiSrvcObj.wifiSrvcStatus) && (buffer) && (length == 2)) 
+                    if ((buffer) && (length == sizeof (SYS_WIFI_SCAN_CONFIG))) 
                     {
-                        channel = (uint8_t *) buffer;
-                        scanType = (bool *) buffer + 1;
-                        ret = SYS_WIFI_SetScan(*channel, *scanType);
+                       /* Client has updated Wi-Fi Scan configuration,
+                        Copy client structure into Scan configuration */
+                        memcpy(&g_wifiSrvcScanConfig, buffer, sizeof (g_wifiSrvcScanConfig));
+                    }
+                    ret = SYS_WIFI_SetScan();
+                    break;
+                }
+
+                case SYS_WIFI_GETDRVHANDLE:
+                {
+                    if ((buffer) && (length == sizeof (DRV_HANDLE))) 
+                    {
+                        /* Client has requested Wi-Fi driver handle,
+                        Copy driver handle into client structure */
+                        *(DRV_HANDLE *)buffer = g_wifiSrvcObj.wifiSrvcDrvHdl;
+                        ret = SYS_WIFI_SUCCESS;
+                    }
+                    else
+                    {
+                        ret = SYS_WIFI_FAILURE;
+                    }
+                    break;
+                }
+                case SYS_WIFI_GETDRVASSOCHANDLE:
+                {
+                    if ((buffer) && (length == sizeof (WDRV_PIC32MZW_ASSOC_HANDLE))) 
+                    {
+                        /* Client has requested Assoc handle,
+                        Copy Assoc handle into client structure */
+                        *(WDRV_PIC32MZW_ASSOC_HANDLE *)buffer = g_wifiSrvcDrvAssocHdl;
+                        ret = SYS_WIFI_SUCCESS;
+                    }
+                    else
+                    {
+                        ret = SYS_WIFI_FAILURE;
                     }
                     break;
                 }
