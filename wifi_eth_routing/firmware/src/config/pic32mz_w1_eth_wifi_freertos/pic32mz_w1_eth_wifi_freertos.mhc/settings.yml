@@ -1,13 +1,14 @@
 configName: pic32mz_w1_eth_wifi_freertos
-folderName: ''
+folderName: pic32mz_w1_curiosity_freertos_routing
 format_version: v1.0
-frameworkPath: ../../git_repository/rio_3_1
+frameworkPath: ..\..\..
 processor: PIC32MZ1025W104132
-projectName: ''
+projectName: pic32mz_w1_curiosity_freertos_routing
 settings:
-  PackageFilter: bootloader;bsp;core;core_apps_pic32mz_w1;core_apps_sam_d21_da1;crypto;cryptoauthlib;csp;csp_apps_pic32mz_w1;dev_packs;net;quick_docs;touch;usb;validation;validationlATEST;validation_withBBOld;wireless_apps_pic32mzw1_wfi32e01;wireless_system_pic32mzw1_wfi32e01;wireless_wifi
+  PackageFilter: azure_rtos;bsp;core;core_apps_pic32mz_w1;crypto;cryptoauthlib;csp;csp_apps_pic32mz_w1;csp_apps_sam_d21_da1;Devices;dev_packs;harmony-services;net;net_apps_pic32mz;quick_docs;touch;touch_apps;usb;wireless_apps_pic32mzw1_wfi32e01;wireless_apps_winc1500;wireless_apps_winc3400;wireless_apps_winc3400_github;wireless_system_pic32mzw1_wfi32e01;wireless_wifi
   FORCE_OPTIMIZATION: 'false'
   GENERATE_BACKUP: 'true'
+  TRUSTZONE: 'false'
   CMSISPath: .\dev_packs\arm\CMSIS\5.8.0
-  MERGE_STRATEGY: USER_ALL
-  DFPPath: .\dev_packs\Microchip\PIC32MZ-W_DFP\1.5.203\atdf\PIC32MZ1025W104132.atdf
+  MERGE_STRATEGY: USER_RECENT
+  DFPPath: .\dev_packs\Microchip\PIC32MZ-W_DFP\1.6.217\atdf\PIC32MZ1025W104132.atdf

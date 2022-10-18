@@ -136,16 +136,15 @@ void APP_Tasks ( void )
         case APP_STATE_INITIATE_SCAN_TASKS:
         {
             uint8_t scan_info_buff[2];
-            scan_info_buff[0] = 0 ;                 //Scan all the channels
-            scan_info_buff[1] = false;              // Set the Scan type as passive (false- passive scan,true -active scan)
-            SYS_WIFI_CtrlMsg(sysObj.syswifi,SYS_WIFI_SCANREQ,scan_info_buff,2);
+            scan_info_buff[0] = 0 ;                     //Scan all the channels
+            scan_info_buff[1] = false;                 // Set the Scan type as passive (false- passive scan,true -active scan)
+            SYS_WIFI_CtrlMsg(sysObj.syswifi, SYS_WIFI_SCANREQ, scan_info_buff, 2);
             appData.state = APP_STATE_IDLE;
             break;
         }
         
         case APP_STATE_IDLE:
         {
-            
             break;
         }
 

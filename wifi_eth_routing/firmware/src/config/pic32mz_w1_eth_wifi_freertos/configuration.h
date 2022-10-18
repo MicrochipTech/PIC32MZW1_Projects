@@ -111,7 +111,7 @@ extern "C" {
 
 
 #define SYS_CONSOLE_DEVICE_MAX_INSTANCES   			1
-#define SYS_CONSOLE_UART_MAX_INSTANCES 	   			1
+#define SYS_CONSOLE_UART_MAX_INSTANCES 	   			2
 #define SYS_CONSOLE_USB_CDC_MAX_INSTANCES 	   		0
 #define SYS_CONSOLE_PRINT_BUFFER_SIZE        		256
 
@@ -142,10 +142,11 @@ extern "C" {
 
 /*** WiFi PIC32MZW1 Driver Configuration ***/
 #define WDRV_PIC32MZW1_DEVICE_USE_SYS_DEBUG
-#define WDRV_PIC32MZW_WPA3_SUPPORT
+#define WDRV_PIC32MZW_WPA3_PERSONAL_SUPPORT
 #define WDRV_PIC32MZW_BA414E_SUPPORT
-#define WDRV_PIC32MZW_ALARM_PERIOD_1MS          390
-#define WDRV_PIC32MZW_ALARM_PERIOD_MAX          168
+#define WDRV_PIC32MZW_BIGINTSW_SUPPORT
+#define WDRV_PIC32MZW_ALARM_PERIOD_1MS          0
+#define WDRV_PIC32MZW_ALARM_PERIOD_MAX          0
 
 
 // *****************************************************************************
@@ -190,9 +191,9 @@ extern "C" {
 
 /*** ICMPv4 Client Configuration ***/
 #define TCPIP_STACK_USE_ICMP_CLIENT
-#define TCPIP_ICMP_CLIENT_USER_NOTIFICATION   true
 #define TCPIP_ICMP_ECHO_REQUEST_TIMEOUT        500
 #define TCPIP_ICMP_TASK_TICK_RATE              33
+#define TCPIP_STACK_MAX_CLIENT_ECHO_REQUESTS   4
 #define TCPIP_ICMP_COMMAND_ENABLE              false
 
 #define SYS_WIFIPROV_NVMADDR        		0x900FF000
@@ -351,6 +352,8 @@ extern "C" {
 
 #define TCPIP_IPV4_FORWARDING_TABLE_MAX_SIZE        10
 #define TCPIP_IPV4_FORWARDING_TABLE_ENTRIES         2
+
+#define TCPIP_IPV4_FORWARDING_STATS     false
 
 
 
@@ -598,6 +601,9 @@ extern "C" {
 /* SYS WIFI RTOS Configurations*/
 #define SYS_WIFI_RTOS_SIZE           		1024
 #define SYS_WIFI_RTOS_PRIORITY             1
+
+#define TCPIP_STACK_NETWORK_INTERAFCE_COUNT  	2
+
 
 
 

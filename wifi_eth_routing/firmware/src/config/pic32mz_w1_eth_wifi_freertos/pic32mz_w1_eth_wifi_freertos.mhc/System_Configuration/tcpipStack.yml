@@ -46,7 +46,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: tcpipStack, value: '36'}
+        attributes: {id: tcpipStack, value: '28'}
   - type: Boolean
     attributes: {id: TCPIP_STACK_INTERFACE_CHANGE_SIGNALING}
     children:
@@ -56,27 +56,6 @@ children:
         attributes: {id: visible}
         children:
         - {type: Value, value: 'true'}
-  - type: Boolean
-    attributes: {id: TCPIP_STACK_INTERRUPT_EN_IDX0}
-    children:
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: tcpipStack, value: 'true'}
-  - type: Boolean
-    attributes: {id: TCPIP_STACK_INT_MAC_IDX1}
-    children:
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: tcpipStack, value: 'true'}
-  - type: Integer
-    attributes: {id: TCPIP_STACK_MAC_CLOCK}
-    children:
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: tcpipStack, value: '100000000'}
   - type: String
     attributes: {id: TCPIP_STACK_MALLOC_FUNC}
     children:
@@ -85,57 +64,12 @@ children:
       - type: Dynamic
         attributes: {id: sysWifiPic32mzw1, value: malloc}
   - type: String
-    attributes: {id: TCPIP_STACK_MII_MODE_IDX1}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: tcpipStack, value: RMII}
-  - type: Menu
-    attributes: {id: TCPIP_STACK_NET_INTERFACE_MENU_IDX0}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
-  - type: Menu
-    attributes: {id: TCPIP_STACK_NET_INTERFACE_MENU_IDX1}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
-  - type: String
     attributes: {id: TCPIP_STACK_NET_INTERFACE_NAME_IDX0}
     children:
     - type: Values
       children:
       - type: Dynamic
         attributes: {id: tcpipStack, value: PIC32MZW1}
-  - type: String
-    attributes: {id: TCPIP_STACK_NET_INTERFACE_NAME_IDX1}
-    children:
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: tcpipStack, value: ETHMAC}
-  - type: Integer
-    attributes: {id: TCPIP_STACK_NET_INTERFACE_NUM}
-    children:
-    - type: Values
-      children:
-      - type: Dynamic
-        attributes: {id: tcpipStack, value: '2'}
   - type: Boolean
     attributes: {id: TCPIP_STACK_SYS_RANDOM_H2_ADAPTER}
     children:
@@ -157,8 +91,6 @@ children:
       children:
       - type: Dynamic
         attributes: {id: sysWifiPic32mzw1, value: TCPIP_STACK_HEAP_TYPE_EXTERNAL_HEAP}
-      - type: User
-        attributes: {value: TCPIP_STACK_HEAP_TYPE_EXTERNAL_HEAP}
 - type: Attachments
   children:
   - type: DirectDependency
@@ -175,4 +107,4 @@ children:
         children:
         - {type: Value, value: sys_console}
 - type: ElementPosition
-  attributes: {x: '510', y: '220', id: tcpipStack}
+  attributes: {x: '250', y: '640', id: tcpipStack}
