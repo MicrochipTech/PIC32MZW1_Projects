@@ -4,7 +4,7 @@
 	"content": {
 		"metaDataVersion": "1.3.0",
 		"name": "com.microchip.mcu32.mplabx.project.PIC32MZW1_Projects_active_scan",
-		"version": "3.6.1",
+		"version": "1.0.2",
 		"displayName": "Wi-Fi Active Scan",
 		"projectName": "active_scan_pic32mz_w1_curiosity_freertos",
 		"shortDescription": "This application acts as a Wi-Fi Station(STA) to perform active scan and shows scan result.",
