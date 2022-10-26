@@ -4,7 +4,7 @@
 	"content": {
 		"metaDataVersion": "1.3.0",
 		"name": "com.microchip.mcu32.mplabx.project.PIC32MZW1_Projects_wifi_eth_routing",
-		"version": "3.6.1",
+		"version": "1.0.2",
 		"displayName": "Wi-Fi-Ethernet Routing Example",
 		"projectName": "pic32mz_w1_curiosity_freertos",
 		"shortDescription": "This application demonstrates how a user can enable both wi-fi and ethernet interfaces along with the routing feature.",

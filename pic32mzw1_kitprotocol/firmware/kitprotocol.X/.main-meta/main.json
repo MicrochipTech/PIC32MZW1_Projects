@@ -4,7 +4,7 @@
 	"content": {
 		"metaDataVersion": "1.3.0",
 		"name": "com.microchip.mcu32.mplabx.project.PIC32MZW1_Projects_pic32mzw1_kitprotocol",
-		"version": "3.6.1",
+		"version": "1.0.2",
 		"displayName": "Fetching manifest file from WFI32 module Trush and Go-TNG",
 		"projectName": "kitprotocol",
 		"shortDescription": "This application implements the USB HID kit protocol bridge required to fetch the manifest file from the TNG TLS chip on the WFI32 module.",

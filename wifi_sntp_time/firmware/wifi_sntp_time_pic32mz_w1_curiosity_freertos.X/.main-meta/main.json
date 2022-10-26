@@ -4,7 +4,7 @@
 	"content": {
 		"metaDataVersion": "1.3.0",
 		"name": "com.microchip.mcu32.mplabx.project.PIC32MZW1_Projects_wifi_sntp_time",
-		"version": "3.6.1",
+		"version": "1.0.2",
 		"displayName": "Wi-Fi SNTP time",
 		"projectName": "wifi_sntp_time_pic32mz_w1_curiosity_freertos",
 		"shortDescription": "This application acts as a Wi-Fi Station(STA) and can be used to measure SNTP time. Once connected to AP, the time taken to fetch time by SNTP will be printed in the console.",

@@ -4,7 +4,7 @@
 	"content": {
 		"metaDataVersion": "1.3.0",
 		"name": "com.microchip.mcu32.mplabx.project.PIC32MZW1_Projects_wifi_timing_wpa2",
-		"version": "3.6.1",
+		"version": "1.0.2",
 		"displayName": "Wi-Fi Connection time (WPA2 mode)",
 		"projectName": "wifi_timing_wpa2_pic32mz_w1_curiosity_freertos",
 		"shortDescription": "This application can be used to measure time taken to establish connection when connecting to a Wi-Fi access point with WPA2 security.",
