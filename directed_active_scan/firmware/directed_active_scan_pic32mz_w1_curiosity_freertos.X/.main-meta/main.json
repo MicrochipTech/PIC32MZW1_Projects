@@ -21,8 +21,8 @@
 			"semverRange": "^1.6.220"
 		},
 		"configurator": {
-			"name": "MHC",
-			"semverRange": ">=3.8.5"
+			"name": "MCC",
+			"semverRange": ">=5.1.17"
 		},
 		"device": {
 			"metaDataVersion": "1.0.0",
@@ -39,7 +39,7 @@
 			"Wi-Fi"
 		],
 		"keywords": [
-			"MHC",
+			"MCC",
 			"Harmony",
 			"PIC32MZ1025W104132",
 			"WFI32",
