@@ -1141,6 +1141,8 @@
         <property key="memories.programmemory.ranges" value="10000000-100fffff"/>
         <property key="memories.programmemory.start" value="0x1d000000"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/directed_active_scan/firmware/directed_active_scan_pic32mz_w1_curiosity_freertos.X/debug/pic32mz_w1_curiosity_freertos/directed_active_scan_pic32mz_w1_curiosity_freertos_ptg"/>
         <property key="programmertogo.imagename" value=""/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>

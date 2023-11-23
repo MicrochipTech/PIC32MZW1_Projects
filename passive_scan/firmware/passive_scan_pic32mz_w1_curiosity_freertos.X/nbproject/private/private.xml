@@ -2,11 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/passive_scan/firmware/src/config/pic32mz_w1_curiosity_freertos/harmony-manifest-success.yml</file>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/passive_scan/firmware/src/app.c</file>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/passive_scan/firmware/src/config/pic32mz_w1_curiosity_freertos/tasks.c</file>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/passive_scan/firmware/src/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ/portmacro.h</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

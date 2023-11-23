@@ -18,7 +18,6 @@
 
 # Libraries
 *.lib
-*.a
 *.la
 *.lo
 
@@ -50,3 +49,20 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+**/nbproject/private
+**/nbproject/Makefile-*
+**/nbproject/Package-*
+**/nbproject/project.properties
+**/*.X/debug
+**/*.X/dist
+**/*.X/build
+**/*.X/.generated_files
+**/*.IAR/Debug
+**/*.IAR/settings
+**/*.IAR/*.dep
+**/*.IAR/*.custom_argvars
+**/*.KEIL/Objects
+**/*.KEIL/*.uvguix.*
+Gemfile*
+**/__pycache__

@@ -3,10 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/wifi_eth_routing/firmware/src/app.c</file>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/wifi_eth_routing/firmware/src/config/pic32mz_w1_eth_wifi_freertos/harmony-manifest-success.yml</file>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/wifi_eth_routing/firmware/src/config/pic32mz_w1_eth_wifi_freertos/tasks.c</file>
-            <file>file:/C:/Users/C67043/Harmony3/B0Support/PIC32MZPrj/wifi_eth_routing/firmware/src/config/pic32mz_w1_eth_wifi_freertos/library/tcpip/src/ipv4.c</file>
+            <file>file:/C:/Harmony3/PIC32MZW1_Projects/wifi_eth_routing/firmware/src/config/pic32mz_w1_eth_wifi_freertos/configuration.h</file>
         </group>
     </open-files>
 </project-private>
